@@ -1,7 +1,7 @@
 import Vapor
 import FluentPostgreSQL
 
-enum PetType: String, Codable  {
+enum PetType: String, PostgreSQLEnum, PostgreSQLMigration, Codable  {
     case Dog
     case Cat
     case Fish
