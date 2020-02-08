@@ -1,5 +1,5 @@
 import Vapor
-import FluentSQLite
+import FluentPostgreSQL
 
 enum PetType: String, Codable  {
     case Dog
@@ -20,7 +20,7 @@ final class Pet: Codable {
     }
 }
 
-extension Pet: SQLiteModel {}
+extension Pet: PostgreSQLModel {}
 
 extension Pet: Migration {}
 
