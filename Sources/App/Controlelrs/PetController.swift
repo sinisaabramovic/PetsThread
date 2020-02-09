@@ -21,6 +21,7 @@ struct PetController: RouteCollection {
         petRoutes.get("search", use: searchHandler)
         petRoutes.get("first", use: getFirstHandler)
         petRoutes.get("sorted", use: sortedHandler)
+        petRoutes.get(Pet.parameter, "user", use: getUserHandler)
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[Pet]> {
@@ -40,6 +41,7 @@ struct PetController: RouteCollection {
             pet.name = updatePet.name
             pet.age = updatePet.age
             pet.type = updatePet.type
+            pet.userID = updatePet.userID
             
             return pet.save(on: req)
         })
@@ -69,5 +71,11 @@ struct PetController: RouteCollection {
     
     func sortedHandler(_ req: Request) throws -> Future<[Pet]> {
         return Pet.query(on: req).sort(\.name, .ascending).all()
+    }
+    
+    func getUserHandler(_ req: Request) throws -> Future<User> {
+        return try req.parameters.next(Pet.self).flatMap(to: User.self, { pet in
+            pet.user.get(on: req)
+        })
     }
 }

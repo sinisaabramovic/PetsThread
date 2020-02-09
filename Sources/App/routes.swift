@@ -17,4 +17,7 @@ public func routes(_ router: Router) throws {
     // Pet controller
     let petController = PetController()
     try router.register(collection: petController)
+    
+    let userController = UserController()
+    try router.register(collection: userController)
 }

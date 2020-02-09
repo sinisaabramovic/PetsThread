@@ -25,6 +25,12 @@ extension Pet: Content {}
 
 extension Pet: Parameter {}
 
+extension Pet {
+    var user: Parent<Pet, User> {
+        return parent(\.userID)
+    }
+}
+
 // Useful Docker commands
 //docker exec -it postgres psql -U vapor -d vapor
 // Manage DB
@@ -32,5 +38,7 @@ extension Pet: Parameter {}
 //docker exec -it postgres psql -U vapor -d postgres -c "CREATE DATABASE vapor;"
 
 // Creates new docker image for PostgreSQL
+// dokcer stop postgres
+// docker rm postgres
 // docker run --name postgres -e POSTGRES_DB=vapor -e POSTGRES_USER=vapor -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
 
