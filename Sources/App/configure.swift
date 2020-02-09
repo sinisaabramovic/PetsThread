@@ -50,6 +50,5 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: User.self, database: .psql)
     migrations.add(model: PetType.self, database: .psql)
     migrations.add(model: Pet.self, database: .psql)
-    migrations.add(model: Category.self, database: .psql)
     services.register(migrations)
 }

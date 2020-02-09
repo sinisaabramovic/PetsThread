@@ -25,6 +25,7 @@ extension Pet: Migration {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
             builder.reference(from: \.userID, to: \User.id)
+            builder.reference(from: \.typeID, to: \PetType.id)
         }
     }
 }
@@ -37,7 +38,8 @@ extension Pet {
     var user: Parent<Pet, User> {
         return parent(\.userID)
     }
-    var type: Parent<Pet, PetType> {
+    
+    var typeOf: Parent<Pet, PetType> {
         return parent(\.typeID)
     }
 }

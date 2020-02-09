@@ -22,7 +22,7 @@ struct PetController: RouteCollection {
         petRoutes.get("first", use: getFirstHandler)
         petRoutes.get("sorted", use: sortedHandler)
         petRoutes.get(Pet.parameter, "user", use: getUserHandler)
-        petRoutes.get(Pet.parameter, "type", use: getTypeHandler)
+        petRoutes.post(Pet.parameter, "types", PetType.parameter, use: getPetTypeHandler)
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[Pet]> {
@@ -79,9 +79,9 @@ struct PetController: RouteCollection {
         })
     }
     
-    func getTypeHandler(_ req: Request) throws -> Future<PetType> {
-        return try req.parameters.next(Pet.self).flatMap(to: PetType.self, { pet in
-            pet.type.get(on: req)
-        })
+    func getPetTypeHandler(_ req: Request) throws -> Future<PetType> {
+        return try req.parameters.next(Pet.self).flatMap(to: PetType.self) { pet in
+            pet.typeOf.get(on: req)
+        }
     }
 }
