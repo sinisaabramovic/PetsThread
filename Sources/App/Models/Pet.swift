@@ -19,7 +19,15 @@ final class Pet: Codable {
 
 extension Pet: PostgreSQLModel {}
 
-extension Pet: Migration {}
+extension Pet: Migration {
+    
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
+            builder.reference(from: \.userID, to: \User.id)
+        }
+    }
+}
 
 extension Pet: Content {}
 
