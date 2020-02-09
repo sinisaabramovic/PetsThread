@@ -5,7 +5,7 @@ import Fluent
 public func routes(_ router: Router) throws {
     // Basic "It works" example
     router.get { req in
-        return "It works! \nCreated in 2020\n by Sinisa"
+        return "It works! \nCreated in 2020 by Sinisa\n"
     }
     
     // Basic "Hello, world!" example
