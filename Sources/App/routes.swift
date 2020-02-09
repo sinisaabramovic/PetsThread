@@ -5,7 +5,16 @@ import Fluent
 public func routes(_ router: Router) throws {
     // Basic "It works" example
     router.get { req in
-        return "It works! \nCreated in 2020 by Sinisa\n"
+        return """
+                          __      _
+                        o'')}____//
+                         `_/      )
+                         (_(_/-(_/
+                **************************************
+                |           It works!                |
+                |     Created in 2020 by Sinisa      |
+                **************************************
+        """
     }
     
     // Basic "Hello, world!" example
@@ -15,9 +24,16 @@ public func routes(_ router: Router) throws {
     
     // Refactored using controllers
     // Pet controller
+    
+    let petTypeController = PetTypeConrtoller()
+    try router.register(collection: petTypeController)
+    
     let petController = PetController()
     try router.register(collection: petController)
     
     let userController = UserController()
     try router.register(collection: userController)
+    
+    let categoriesController = CategoryController()
+    try router.register(collection: categoriesController)
 }

@@ -6,12 +6,12 @@ final class Pet: Codable {
     var id: Int?
     var userID: User.ID
     var name: String
-    var type: String
+    var typeID: PetType.ID
     var age: Int
     
-    init(name: String, type: String, age: Int, userID: User.ID) {
+    init(name: String, type: PetType.ID, age: Int, userID: User.ID) {
         self.name = name
-        self.type = type
+        self.typeID = type
         self.age = age
         self.userID = userID
     }
@@ -36,6 +36,9 @@ extension Pet: Parameter {}
 extension Pet {
     var user: Parent<Pet, User> {
         return parent(\.userID)
+    }
+    var type: Parent<Pet, PetType> {
+        return parent(\.typeID)
     }
 }
 
