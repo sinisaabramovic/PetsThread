@@ -14,7 +14,7 @@ struct PetController: RouteCollection {
     func boot(router: Router) throws {
         let petRoutes = router.grouped("api", "pets")
         petRoutes.get(use: getAllHandler)
-        petRoutes.post(use: createHandler)
+        petRoutes.post(Pet.self, use: createHandler)
         petRoutes.get(Pet.parameter, use: getHandler)
         petRoutes.put(Pet.parameter, use: updateHandler)
         petRoutes.delete(Pet.parameter, use: deleteHandler)
@@ -27,13 +27,8 @@ struct PetController: RouteCollection {
         return Pet.query(on: req).all()
     }
     
-    func createHandler(_ req: Request) throws -> Future<Pet> {
-        return try req
-            .content
-            .decode(Pet.self)
-            .flatMap(to: Pet.self, { pet in
-            return pet.save(on: req)
-        })
+    func createHandler(_ req: Request, pet: Pet) throws -> Future<Pet> {
+        return pet.save(on: req)
     }
     
     func getHandler(_ req: Request) throws -> Future<Pet> {
