@@ -14,10 +14,13 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-sqlite.git", from: "3.0.0"),
         
         // 🐘 Non-blocking, event-driven Swift client for PostgreSQL.
-        .package(url: "https://github.com/vapor/fluent-postgresql.git", from: "1.0.0")
+        .package(url: "https://github.com/vapor/fluent-postgresql.git", from: "1.0.0"),
+        
+        // Jobs
+        .package(url: "https://github.com/BrettRToomey/Jobs.git", from: "1.1.1")
     ],
     targets: [
-        .target(name: "App", dependencies: ["FluentSQLite", "FluentPostgreSQL", "Vapor"]),
+        .target(name: "App", dependencies: ["Jobs", "FluentSQLite", "FluentPostgreSQL", "Vapor"]),
         .target(name: "Run", dependencies: ["App"]),
         .testTarget(name: "AppTests", dependencies: ["App"])
     ]

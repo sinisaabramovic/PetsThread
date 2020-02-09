@@ -4,9 +4,9 @@ import FluentPostgreSQL
 
 final class Pet: Codable {
     var id: Int?
-    var userID: User.ID
-    var name: String
+    var userID: User.ID    
     var typeID: PetType.ID
+    var name: String
     var age: Int
     
     init(name: String, type: PetType.ID, age: Int, userID: User.ID) {
