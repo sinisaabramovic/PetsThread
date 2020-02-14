@@ -18,7 +18,9 @@ final class PetType: Codable {
     }
 }
 
-extension PetType: PostgreSQLUUIDModel {}
+extension PetType: PostgreSQLUUIDModel {
+    static var entity: String = "Types"
+}
 extension PetType: Migration {}
 extension PetType: Content {}
 extension PetType: Parameter {}

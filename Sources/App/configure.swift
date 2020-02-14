@@ -49,6 +49,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     var migrations = MigrationConfig()
     migrations.add(model: User.self, database: .psql)
     migrations.add(model: PetType.self, database: .psql)
+    migrations.add(model: PetThreadType.self, database: .psql)
     migrations.add(model: Pet.self, database: .psql)
+    migrations.add(model: PetThread.self, database: .psql)
     services.register(migrations)
 }

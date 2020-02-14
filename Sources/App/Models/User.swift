@@ -11,16 +11,23 @@ import FluentPostgreSQL
 
 final class User: Codable {
     var id: UUID?
+    
     var name: String
     var username: String
+    var password: String
+    var imageURL: String
     
-    init(name: String, username: String) {
+    init(name: String, username: String, password: String, imageURL: String) {
         self.name = name
         self.username = username
+        self.password = password
+        self.imageURL = imageURL
     }
 }
 
-extension User: PostgreSQLUUIDModel {}
+extension User: PostgreSQLUUIDModel {
+    static var entity: String = "Users"
+}
 extension User: Content {}
 extension User: Migration {}
 extension User: Parameter {}

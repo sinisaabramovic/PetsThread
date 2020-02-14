@@ -6,18 +6,23 @@ final class Pet: Codable {
     var id: Int?
     var userID: User.ID    
     var typeID: PetType.ID
+    
     var name: String
     var age: Int
+    var imageURL: String
     
-    init(name: String, type: PetType.ID, age: Int, userID: User.ID) {
+    init(name: String, type: PetType.ID, age: Int, userID: User.ID, imageURL: String) {
         self.name = name
         self.typeID = type
         self.age = age
         self.userID = userID
+        self.imageURL = imageURL
     }
 }
 
-extension Pet: PostgreSQLModel {}
+extension Pet: PostgreSQLModel {
+    static var entity: String = "Pets"
+}
 
 extension Pet: Migration {
     
@@ -31,9 +36,7 @@ extension Pet: Migration {
 }
 
 extension Pet: Content {}
-
 extension Pet: Parameter {}
-
 extension Pet {
     var user: Parent<Pet, User> {
         return parent(\.userID)
@@ -51,7 +54,9 @@ extension Pet {
 //docker exec -it postgres psql -U vapor -d postgres -c "CREATE DATABASE vapor;"
 
 // Creates new docker image for PostgreSQL
-// dokcer stop postgres
+// docker stop postgres
 // docker rm postgres
 // docker run --name postgres -e POSTGRES_DB=vapor -e POSTGRES_USER=vapor -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
 
+// Start Docker container
+// docker container start postgres
