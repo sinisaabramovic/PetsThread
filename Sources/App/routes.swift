@@ -35,7 +35,7 @@ public func routes(_ router: Router) throws {
     // Refactored using controllers
     // Pet controller
     
-    let petTypeController = PetTypeConrtoller()
+    let petTypeController = PetTypeController()
     try router.register(collection: petTypeController)
     
     let petController = PetController()
@@ -43,4 +43,10 @@ public func routes(_ router: Router) throws {
     
     let userController = UserController()
     try router.register(collection: userController)
+    
+    let petthreadTypeController = PetThreadTypeController()
+    try router.register(collection: petthreadTypeController)
+    
+    let petThreadController = PetThreadController()
+    try router.register(collection: petThreadController)
 }

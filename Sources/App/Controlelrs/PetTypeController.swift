@@ -9,7 +9,7 @@ import Foundation
 import Vapor
 import Fluent
 
-struct PetTypeConrtoller: RouteCollection {
+struct PetTypeController: RouteCollection {
     func boot(router: Router) throws {
         let usersRoute = router.grouped("api", "types")
         usersRoute.post(PetType.self, use: createHandler)
