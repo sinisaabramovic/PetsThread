@@ -24,4 +24,8 @@ struct PetThreadController: RouteCollection {
     func getAllHandler(_ req: Request) throws -> Future<[PetThread]> {
         return PetThread.query(on: req).all()
     }
+    
+    func getAllForUserHandler(_ req: Request) throws -> Future<[PetThread]> {
+        return PetThread.query(on: req).all()
+    }
 }

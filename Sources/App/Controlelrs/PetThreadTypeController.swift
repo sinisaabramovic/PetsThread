@@ -14,7 +14,7 @@ struct PetThreadTypeController: RouteCollection {
         let threadTypeRoute = router.grouped("api", "threadtypes")
         threadTypeRoute.post(PetThreadType.self, use: createHandler)
         threadTypeRoute.get(use: getAllHandler)
-        threadTypeRoute.get(User.parameter, use: getHandler)
+        threadTypeRoute.get(PetThreadType.parameter, use: getHandler)
     }
     
     func createHandler(_ req: Request, type: PetThreadType) throws -> Future<PetThreadType> {

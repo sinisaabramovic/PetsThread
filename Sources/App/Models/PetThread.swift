@@ -18,12 +18,14 @@ final class PetThread: Codable {
     var typeID: PetThreadType.ID
     
     var threadName: String?
+    var threadDescription: String?
     var dateCreated: Date?
     var isActive: Bool?
     var executionInSeconds: Int?
     
-    init(name: String, userID: UUID, petID: Int, dateCreated: Date, isActive: Bool, executeIn: Int, type: PetThreadType.ID) {
+    init(name: String, threadDescription: String, userID: UUID, petID: Int, dateCreated: Date, isActive: Bool, executeIn: Int, type: PetThreadType.ID) {
         self.threadName = name
+        self.threadDescription = threadDescription
         self.userID = userID
         self.petID = petID
         self.dateCreated = dateCreated

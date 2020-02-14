@@ -14,7 +14,7 @@ struct PetTypeController: RouteCollection {
         let usersRoute = router.grouped("api", "types")
         usersRoute.post(PetType.self, use: createHandler)
         usersRoute.get(use: getAllHandler)
-        usersRoute.get(User.parameter, use: getHandler)
+        usersRoute.get(PetType.parameter, use: getHandler)
     }
     
     func createHandler(_ req: Request, type: PetType) throws -> Future<PetType> {

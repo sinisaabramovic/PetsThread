@@ -54,3 +54,17 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: PetThread.self, database: .psql)
     services.register(migrations)
 }
+
+// Useful Docker commands
+//docker exec -it postgres psql -U vapor -d vapor
+// Manage DB
+//docker exec -it postgres psql -U vapor -d postgres -c "DROP DATABASE vapor;"
+//docker exec -it postgres psql -U vapor -d postgres -c "CREATE DATABASE vapor;"
+
+// Creates new docker image for PostgreSQL
+// docker stop postgres
+// docker rm postgres
+// docker run --name postgres -e POSTGRES_DB=vapor -e POSTGRES_USER=vapor -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
+
+// Start Docker container
+// docker container start postgres
