@@ -12,7 +12,7 @@ import Fluent
 struct PetThreadTypeController: RouteCollection {
     func boot(router: Router) throws {
         let threadTypeRoute = router.grouped("api", "threadtypes")
-        threadTypeRoute.post(PetThreadType.self, use: createHandler)
+//        threadTypeRoute.post(PetThreadType.self, use: createHandler)
         threadTypeRoute.get(use: getAllHandler)
         threadTypeRoute.get(PetThreadType.parameter, use: getHandler)
     }

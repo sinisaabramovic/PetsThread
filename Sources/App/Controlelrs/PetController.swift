@@ -26,23 +26,35 @@ struct PetController: RouteCollection {
         
         tokenAuthGroup.get(use: getAllHandler)
         tokenAuthGroup.get(Pet.parameter, use: getHandler)
-        tokenAuthGroup.get("search", use: searchHandler)
-        tokenAuthGroup.get("first", use: getFirstHandler)
-        tokenAuthGroup.get("sorted", use: sortedHandler)
-        tokenAuthGroup.get(Pet.parameter, "user", use: getUserHandler)
+//        tokenAuthGroup.get("search", use: searchHandler)
+//        tokenAuthGroup.get("first", use: getFirstHandler)
+//        tokenAuthGroup.get("sorted", use: sortedHandler)
+//        tokenAuthGroup.get(Pet.parameter, "user", use: getUserHandler)
         tokenAuthGroup.get(Pet.parameter, "threads", use: getThreadsHandler)
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[Pet]> {
-        return Pet.query(on: req).all()
+        let isAccepted = try _isAccetable(on: req, for: "userID")
+        if isAccepted {
+            return Pet.query(on: req).all()
+        } else {
+            throw Abort(.badRequest)
+        }
     }
     
     func createHandler(_ req: Request, pet: Pet) throws -> Future<Pet> {
+        let user = try req.requireAuthenticated(User.self)
+        pet.userID = try user.requireID()
         return pet.save(on: req)
     }
     
     func getHandler(_ req: Request) throws -> Future<Pet> {
-        return try req.parameters.next(Pet.self)
+        let isAccepted = try _isAccetable(on: req, for: "userID")
+        if isAccepted {
+            return try req.parameters.next(Pet.self)
+        } else {
+            throw Abort(.badRequest)
+        }
     }
     
     func updateHandler(_ req: Request) throws -> Future<Pet> {
@@ -59,28 +71,48 @@ struct PetController: RouteCollection {
     }
     
     func deleteHandler(_ req: Request) throws -> Future<HTTPStatus> {
-        return try req
+        let isAccepted = try _isAccetable(on: req, for: "userID")
+        if isAccepted {
+            return try req
             .parameters
             .next(Pet.self)
             .delete(on: req)
             .transform(to: .noContent)
+        } else {
+            throw Abort(.badRequest)
+        }
     }
     
     func searchHandler(_ req: Request) throws -> Future<[Pet]> {
-        guard let search = req.query[String.self, at: "name"] else {
+        let isAccepted = try _isAccetable(on: req, for: "userID")
+        if isAccepted {
+            guard let search = req.query[String.self, at: "name"] else {
+                throw Abort(.badRequest)
+            }
+            return Pet.query(on: req).group(.or) { or in
+                or.filter(\.name == search)
+            }.all()
+        } else {
             throw Abort(.badRequest)
         }
-        return Pet.query(on: req).group(.or) { or in
-            or.filter(\.name == search)
-        }.all()
     }
     
     func getFirstHandler(_ req: Request) throws -> Future<Pet> {
-        return Pet.query(on: req).first().unwrap(or: Abort(.notFound))
+        let isAccepted = try _isAccetable(on: req, for: "userID")
+        if isAccepted {
+            return Pet.query(on: req).first().unwrap(or: Abort(.notFound))
+        } else {
+            throw Abort(.badRequest)
+        }
     }
     
     func sortedHandler(_ req: Request) throws -> Future<[Pet]> {
-        return Pet.query(on: req).sort(\.name, .ascending).all()
+        let isAccepted = try _isAccetable(on: req, for: "userID")
+        if isAccepted {
+            return Pet.query(on: req).sort(\.name, .ascending).all()
+        } else {
+            throw Abort(.badRequest)
+        }
     }
     
     func getUserHandler(_ req: Request) throws -> Future<User.Public> {
@@ -115,6 +147,19 @@ struct PetController: RouteCollection {
                          req.parameters.next(PetThread.self)) { pet, thread in
         return pet.categories.detach(thread, on: req).transform(to: .noContent)
       }
+    }
+}
+
+private extension PetController {
+    
+    func _isAccetable(on req: Request, for param: String) throws -> Bool {
+        guard let search = req.query[String.self, at: param] else {
+            throw Abort(.badRequest)
+        }
+        let user = try req.requireAuthenticated(User.self)
+        let userID = try user.requireID().uuidString
+        
+        return userID == search
     }
 }
 

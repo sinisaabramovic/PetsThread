@@ -24,15 +24,27 @@ struct PetThreadController: RouteCollection {
     }
     
     func createHandler(_ req: Request, thread: PetThread) throws -> Future<PetThread> {
+        let user = try req.requireAuthenticated(User.self)
+        thread.userID = try user.requireID()
         return thread.save(on: req)
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[PetThread]> {
-        return PetThread.query(on: req).all()
+        let isAccepted = try _isAccetable(on: req, for: "userID")
+        if isAccepted {
+            return PetThread.query(on: req).all()
+        } else {
+            throw Abort(.badRequest)
+        }        
     }
     
     func getHandler(_ req: Request) throws -> Future<PetThread> {
-      return try req.parameters.next(PetThread.self)
+        let isAccepted = try _isAccetable(on: req, for: "userID")
+        if isAccepted {
+            return try req.parameters.next(PetThread.self)
+        } else {
+            throw Abort(.badRequest)
+        }
     }
     
     func getAllForUserHandler(_ req: Request) throws -> Future<[PetThread]> {
@@ -43,5 +55,18 @@ struct PetThreadController: RouteCollection {
       return try req.parameters.next(PetThread.self).flatMap(to: [Pet].self) { thread in
         try thread.pets.query(on: req).all()
       }
+    }
+}
+
+private extension PetThreadController {
+    
+    func _isAccetable(on req: Request, for param: String) throws -> Bool {
+        guard let search = req.query[String.self, at: param] else {
+            throw Abort(.badRequest)
+        }
+        let user = try req.requireAuthenticated(User.self)
+        let userID = try user.requireID().uuidString
+        
+        return userID == search
     }
 }

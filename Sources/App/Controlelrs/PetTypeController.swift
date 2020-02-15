@@ -12,7 +12,7 @@ import Fluent
 struct PetTypeController: RouteCollection {
     func boot(router: Router) throws {
         let usersRoute = router.grouped("api", "types")
-        usersRoute.post(PetType.self, use: createHandler)
+//        usersRoute.post(PetType.self, use: createHandler)
         usersRoute.get(use: getAllHandler)
         usersRoute.get(PetType.parameter, use: getHandler)
     }
