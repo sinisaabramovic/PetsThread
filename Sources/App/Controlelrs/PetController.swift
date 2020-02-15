@@ -58,10 +58,7 @@ struct PetController: RouteCollection {
     
     func updateHandler(_ req: Request) throws -> Future<Pet> {
         return try flatMap(to: Pet.self, req.parameters.next(Pet.self), req.content.decode(PetCreateData.self), { (pet, updatePet) in
-            pet.name = updatePet.name
-            pet.age = updatePet.age
-            pet.imageURL = updatePet.imageURL
-            pet.typeID = updatePet.typeID
+            pet.configure(with: updatePet)
             let user = try req.requireAuthenticated(User.self)
             pet.userID = try user.requireID()
             

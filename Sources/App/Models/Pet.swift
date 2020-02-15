@@ -54,5 +54,12 @@ extension Pet {
     var categories: Siblings<Pet, PetThread, PetThreadPivot> {
       return siblings()
     }
+    
+    func configure(with pet: PetCreateData) {
+        self.name = pet.name
+        self.typeID = pet.typeID
+        self.age = pet.age
+        self.imageURL = pet.imageURL
+    }
 }
 

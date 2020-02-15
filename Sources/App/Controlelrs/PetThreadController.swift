@@ -29,6 +29,16 @@ struct PetThreadController: RouteCollection {
         return thread.save(on: req)
     }
     
+    func updateHandler(_ req: Request) throws -> Future<PetThread> {
+        return try flatMap(to: PetThread.self, req.parameters.next(PetThread.self), req.content.decode(PetThread.self), { (thread, updateThread) in
+            thread.configure(with: updateThread)
+            let user = try req.requireAuthenticated(User.self)
+            thread.userID = try user.requireID()
+            
+            return thread.save(on: req)
+        })
+    }
+    
     func getAllHandler(_ req: Request) throws -> Future<[PetThread]> {
         let user = try req.requireAuthenticated(User.self)
         let userID = try user.requireID()

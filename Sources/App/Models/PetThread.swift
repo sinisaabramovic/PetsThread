@@ -62,8 +62,21 @@ extension PetThread: Migration {
 }
 
 extension PetThread {
+    
     var pets: Siblings<PetThread, Pet, PetThreadPivot> {
       return siblings()
+    }
+    
+    func configure(with thread: PetThread) {
+        self.threadName = thread.threadName
+        self.threadDescription = thread.threadDescription
+        self.userID = thread.userID
+        self.petID = thread.petID
+        self.dateCreated = thread.dateCreated
+        self.isActive = thread.isActive
+        self.executionInSeconds = thread.executionInSeconds
+        self.typeID = thread.typeID
+        self.imageURL = thread.imageURL
     }
 }
 
