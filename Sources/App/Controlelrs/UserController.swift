@@ -19,8 +19,8 @@ struct UserController: RouteCollection {
         usersRoute.get(User.parameter, "pets", use: getPetsHandler)
         
         let basicAuthMiddleware = User.basicAuthMiddleware(using: BCryptDigest())
-          let basicAuthGroup = usersRoute.grouped(basicAuthMiddleware)
-          basicAuthGroup.post("login", use: loginHandler)
+        let basicAuthGroup = usersRoute.grouped(basicAuthMiddleware)
+        basicAuthGroup.post("login", use: loginHandler)
     }
     
     func createHandler(_ req: Request, user: User) throws -> Future<User.Public> {

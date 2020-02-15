@@ -14,13 +14,6 @@ struct PetController: RouteCollection {
     
     func boot(router: Router) throws {
         let petRoutes = router.grouped("api", "pets")
-        petRoutes.get(use: getAllHandler)
-        petRoutes.get(Pet.parameter, use: getHandler)
-        petRoutes.get("search", use: searchHandler)
-        petRoutes.get("first", use: getFirstHandler)
-        petRoutes.get("sorted", use: sortedHandler)
-        petRoutes.get(Pet.parameter, "user", use: getUserHandler)
-        petRoutes.get(Pet.parameter, "threads", use: getThreadsHandler)
         
         let basicAuthMiddleware = User.basicAuthMiddleware(using: BCryptDigest())
         let guardAuthMiddleware = User.guardAuthMiddleware()
@@ -30,6 +23,14 @@ struct PetController: RouteCollection {
         protected.delete(Pet.parameter, use: deleteHandler)
         protected.post(Pet.parameter, "threads", PetThread.parameter, use: addThreadHandler)
         protected.delete(Pet.parameter, "threads", PetThread.parameter, use: removeThreadHandler)
+        
+        protected.get(use: getAllHandler)
+        protected.get(Pet.parameter, use: getHandler)
+        protected.get("search", use: searchHandler)
+        protected.get("first", use: getFirstHandler)
+        protected.get("sorted", use: sortedHandler)
+        protected.get(Pet.parameter, "user", use: getUserHandler)
+        protected.get(Pet.parameter, "threads", use: getThreadsHandler)
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[Pet]> {

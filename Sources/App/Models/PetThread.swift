@@ -35,9 +35,14 @@ final class PetThread: Codable {
     }
 }
 
+
+extension PetThread: Content {}
+extension PetThread: Parameter {}
+
 extension PetThread: PostgreSQLModel {
     static var entity: String = "Threads"
 }
+
 extension PetThread: Migration {
     
     static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
@@ -49,5 +54,10 @@ extension PetThread: Migration {
          }
      }
 }
-extension PetThread: Content {}
-extension PetThread: Parameter {}
+
+extension PetThread {
+    var pets: Siblings<PetThread, Pet, PetThreadPivot> {
+      return siblings()
+    }
+}
+
