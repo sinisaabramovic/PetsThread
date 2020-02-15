@@ -29,6 +29,10 @@ extension PetType: Migration {
             builder.unique(on: \.name)
         }
     }
+    
+    static func revert(on connection: PostgreSQLConnection) -> Future<Void> {
+      return .done(on: connection)
+    }
 }
 extension PetType: Content {}
 extension PetType: Parameter {}

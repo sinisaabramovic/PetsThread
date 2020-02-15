@@ -22,11 +22,16 @@ extension PetThreadType: PostgreSQLUUIDModel {
     static var entity: String = "ThreadTypes"
 }
 extension PetThreadType: Migration {
+    
     static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
             builder.unique(on: \.name)
         }
+    }
+    
+    static func revert(on connection: PostgreSQLConnection) -> Future<Void> {
+      return .done(on: connection)
     }
 }
 extension PetThreadType: Content {}
