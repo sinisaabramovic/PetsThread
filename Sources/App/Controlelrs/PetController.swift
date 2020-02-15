@@ -15,22 +15,22 @@ struct PetController: RouteCollection {
     func boot(router: Router) throws {
         let petRoutes = router.grouped("api", "pets")
         
-        let basicAuthMiddleware = User.basicAuthMiddleware(using: BCryptDigest())
+        let tokenAuthMiddleware = User.tokenAuthMiddleware()
         let guardAuthMiddleware = User.guardAuthMiddleware()
-        let protected = petRoutes.grouped(basicAuthMiddleware, guardAuthMiddleware)
-        protected.post(Pet.self, use: createHandler)
-        protected.put(Pet.parameter, use: updateHandler)
-        protected.delete(Pet.parameter, use: deleteHandler)
-        protected.post(Pet.parameter, "threads", PetThread.parameter, use: addThreadHandler)
-        protected.delete(Pet.parameter, "threads", PetThread.parameter, use: removeThreadHandler)
+        let tokenAuthGroup = petRoutes.grouped(tokenAuthMiddleware, guardAuthMiddleware)
+        tokenAuthGroup.post(Pet.self, use: createHandler)
+        tokenAuthGroup.put(Pet.parameter, use: updateHandler)
+        tokenAuthGroup.delete(Pet.parameter, use: deleteHandler)
+        tokenAuthGroup.post(Pet.parameter, "threads", PetThread.parameter, use: addThreadHandler)
+        tokenAuthGroup.delete(Pet.parameter, "threads", PetThread.parameter, use: removeThreadHandler)
         
-        protected.get(use: getAllHandler)
-        protected.get(Pet.parameter, use: getHandler)
-        protected.get("search", use: searchHandler)
-        protected.get("first", use: getFirstHandler)
-        protected.get("sorted", use: sortedHandler)
-        protected.get(Pet.parameter, "user", use: getUserHandler)
-        protected.get(Pet.parameter, "threads", use: getThreadsHandler)
+        tokenAuthGroup.get(use: getAllHandler)
+        tokenAuthGroup.get(Pet.parameter, use: getHandler)
+        tokenAuthGroup.get("search", use: searchHandler)
+        tokenAuthGroup.get("first", use: getFirstHandler)
+        tokenAuthGroup.get("sorted", use: sortedHandler)
+        tokenAuthGroup.get(Pet.parameter, "user", use: getUserHandler)
+        tokenAuthGroup.get(Pet.parameter, "threads", use: getThreadsHandler)
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[Pet]> {

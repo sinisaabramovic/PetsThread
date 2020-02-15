@@ -12,8 +12,7 @@ import Fluent
 struct PetThreadController: RouteCollection {
     
     func boot(router: Router) throws {
-        let threadsRoute = router.grouped("api", "threads")
-        
+        let threadsRoute = router.grouped("api", "threads")        
         
         let tokenAuthMiddleware = User.tokenAuthMiddleware()
         let guardAuthMiddleware = User.guardAuthMiddleware()
