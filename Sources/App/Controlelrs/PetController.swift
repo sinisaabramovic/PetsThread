@@ -25,21 +25,20 @@ struct PetController: RouteCollection {
         tokenAuthGroup.delete(Pet.parameter, "threads", PetThread.parameter, use: removeThreadHandler)
         
         tokenAuthGroup.get(use: getAllHandler)
-        tokenAuthGroup.get(Pet.parameter, use: getHandler)
-//        tokenAuthGroup.get("search", use: searchHandler)
-//        tokenAuthGroup.get("first", use: getFirstHandler)
-//        tokenAuthGroup.get("sorted", use: sortedHandler)
-//        tokenAuthGroup.get(Pet.parameter, "user", use: getUserHandler)
+//        tokenAuthGroup.get(Pet.parameter, use: getHandler)
+        //        tokenAuthGroup.get("search", use: searchHandler)
+        //        tokenAuthGroup.get("first", use: getFirstHandler)
+        //        tokenAuthGroup.get("sorted", use: sortedHandler)
+        //        tokenAuthGroup.get(Pet.parameter, "user", use: getUserHandler)
         tokenAuthGroup.get(Pet.parameter, "threads", use: getThreadsHandler)
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[Pet]> {
-        let isAccepted = try _isAccetable(on: req, for: "userID")
-        if isAccepted {
-            return Pet.query(on: req).all()
-        } else {
-            throw Abort(.badRequest)
-        }
+        let user = try req.requireAuthenticated(User.self)
+        let userID = try user.requireID()
+        return Pet.query(on: req).group(.or) { or in
+            or.filter(\.userID == userID)
+        }.sort(\.id, .ascending).all()
     }
     
     func createHandler(_ req: Request, pet: Pet) throws -> Future<Pet> {
@@ -48,14 +47,14 @@ struct PetController: RouteCollection {
         return pet.save(on: req)
     }
     
-    func getHandler(_ req: Request) throws -> Future<Pet> {
-        let isAccepted = try _isAccetable(on: req, for: "userID")
-        if isAccepted {
-            return try req.parameters.next(Pet.self)
-        } else {
-            throw Abort(.badRequest)
-        }
-    }
+//    func getHandler(_ req: Request) throws -> Future<Pet> {
+//        let isAccepted = try _isAccetable(on: req, for: "userID")
+//        if isAccepted {
+//            return try req.parameters.next(Pet.self)
+//        } else {
+//            throw Abort(.badRequest)
+//        }
+//    }
     
     func updateHandler(_ req: Request) throws -> Future<Pet> {
         return try flatMap(to: Pet.self, req.parameters.next(Pet.self), req.content.decode(PetCreateData.self), { (pet, updatePet) in
@@ -74,10 +73,10 @@ struct PetController: RouteCollection {
         let isAccepted = try _isAccetable(on: req, for: "userID")
         if isAccepted {
             return try req
-            .parameters
-            .next(Pet.self)
-            .delete(on: req)
-            .transform(to: .noContent)
+                .parameters
+                .next(Pet.self)
+                .delete(on: req)
+                .transform(to: .noContent)
         } else {
             throw Abort(.badRequest)
         }
@@ -127,26 +126,24 @@ struct PetController: RouteCollection {
         }
     }
     
-
-
     func addThreadHandler(_ req: Request) throws -> Future<HTTPStatus> {
-      return try flatMap(to: HTTPStatus.self, req.parameters.next(Pet.self),
-                         req.parameters.next(PetThread.self)) { pet, thread in
-        return pet.categories.attach(thread, on: req).transform(to: .created)
-      }
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(Pet.self),
+                           req.parameters.next(PetThread.self)) { pet, thread in
+                            return pet.categories.attach(thread, on: req).transform(to: .created)
+        }
     }
-
+    
     func getThreadsHandler(_ req: Request) throws -> Future<[PetThread]> {
-      return try req.parameters.next(Pet.self).flatMap(to: [PetThread].self) { pet in
-        try pet.categories.query(on: req).all()
-      }
+        return try req.parameters.next(Pet.self).flatMap(to: [PetThread].self) { pet in
+            try pet.categories.query(on: req).all()
+        }
     }
-
+    
     func removeThreadHandler(_ req: Request) throws -> Future<HTTPStatus> {
-      return try flatMap(to: HTTPStatus.self, req.parameters.next(Pet.self),
-                         req.parameters.next(PetThread.self)) { pet, thread in
-        return pet.categories.detach(thread, on: req).transform(to: .noContent)
-      }
+        return try flatMap(to: HTTPStatus.self, req.parameters.next(Pet.self),
+                           req.parameters.next(PetThread.self)) { pet, thread in
+                            return pet.categories.detach(thread, on: req).transform(to: .noContent)
+        }
     }
 }
 
