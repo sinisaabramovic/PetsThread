@@ -8,21 +8,28 @@
 import Foundation
 import Vapor
 import Fluent
+import Authentication
 
 struct PetController: RouteCollection {
     
     func boot(router: Router) throws {
         let petRoutes = router.grouped("api", "pets")
         petRoutes.get(use: getAllHandler)
-        petRoutes.post(Pet.self, use: createHandler)
         petRoutes.get(Pet.parameter, use: getHandler)
-        petRoutes.put(Pet.parameter, use: updateHandler)
-        petRoutes.delete(Pet.parameter, use: deleteHandler)
         petRoutes.get("search", use: searchHandler)
         petRoutes.get("first", use: getFirstHandler)
         petRoutes.get("sorted", use: sortedHandler)
         petRoutes.get(Pet.parameter, "user", use: getUserHandler)
-        petRoutes.post(Pet.parameter, "types", PetType.parameter, use: getPetTypeHandler)
+        petRoutes.get(Pet.parameter, "threads", use: getThreadsHandler)
+        
+        let basicAuthMiddleware = User.basicAuthMiddleware(using: BCryptDigest())
+        let guardAuthMiddleware = User.guardAuthMiddleware()
+        let protected = petRoutes.grouped(basicAuthMiddleware, guardAuthMiddleware)
+        protected.post(Pet.self, use: createHandler)
+        protected.put(Pet.parameter, use: updateHandler)
+        protected.delete(Pet.parameter, use: deleteHandler)
+        protected.post(Pet.parameter, "threads", PetThread.parameter, use: addThreadHandler)
+        protected.delete(Pet.parameter, "threads", PetThread.parameter, use: removeThreadHandler)
     }
     
     func getAllHandler(_ req: Request) throws -> Future<[Pet]> {
@@ -38,11 +45,13 @@ struct PetController: RouteCollection {
     }
     
     func updateHandler(_ req: Request) throws -> Future<Pet> {
-        return try flatMap(to: Pet.self, req.parameters.next(Pet.self), req.content.decode(Pet.self), { (pet, updatePet) in
+        return try flatMap(to: Pet.self, req.parameters.next(Pet.self), req.content.decode(PetCreateData.self), { (pet, updatePet) in
             pet.name = updatePet.name
             pet.age = updatePet.age
+            pet.imageURL = updatePet.imageURL
             pet.typeID = updatePet.typeID
-            pet.userID = updatePet.userID
+            let user = try req.requireAuthenticated(User.self)
+            pet.userID = try user.requireID()
             
             return pet.save(on: req)
         })
@@ -73,9 +82,9 @@ struct PetController: RouteCollection {
         return Pet.query(on: req).sort(\.name, .ascending).all()
     }
     
-    func getUserHandler(_ req: Request) throws -> Future<User> {
-        return try req.parameters.next(Pet.self).flatMap(to: User.self, { pet in
-            pet.user.get(on: req)
+    func getUserHandler(_ req: Request) throws -> Future<User.Public> {
+        return try req.parameters.next(Pet.self).flatMap(to: User.Public.self, { pet in
+            pet.user.get(on: req).convertToPublic()
         })
     }
     
@@ -84,4 +93,33 @@ struct PetController: RouteCollection {
             pet.typeOf.get(on: req)
         }
     }
+    
+
+
+    func addThreadHandler(_ req: Request) throws -> Future<HTTPStatus> {
+      return try flatMap(to: HTTPStatus.self, req.parameters.next(Pet.self),
+                         req.parameters.next(PetThread.self)) { pet, thread in
+        return pet.categories.attach(thread, on: req).transform(to: .created)
+      }
+    }
+
+    func getThreadsHandler(_ req: Request) throws -> Future<[PetThread]> {
+      return try req.parameters.next(Pet.self).flatMap(to: [PetThread].self) { pet in
+        try pet.categories.query(on: req).all()
+      }
+    }
+
+    func removeThreadHandler(_ req: Request) throws -> Future<HTTPStatus> {
+      return try flatMap(to: HTTPStatus.self, req.parameters.next(Pet.self),
+                         req.parameters.next(PetThread.self)) { pet, thread in
+        return pet.categories.detach(thread, on: req).transform(to: .noContent)
+      }
+    }
+}
+
+struct PetCreateData: Content {
+    let name: String
+    let age: Int
+    let imageURL: String
+    var typeID: PetType.ID
 }

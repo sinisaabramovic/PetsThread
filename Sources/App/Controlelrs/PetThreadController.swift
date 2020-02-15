@@ -29,3 +29,9 @@ struct PetThreadController: RouteCollection {
         return PetThread.query(on: req).all()
     }
 }
+
+struct PetThreadCreateData: Content {
+    let name: String
+    let age: Int
+    let imageURL: String
+}

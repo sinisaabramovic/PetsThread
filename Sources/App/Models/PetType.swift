@@ -21,7 +21,15 @@ final class PetType: Codable {
 extension PetType: PostgreSQLUUIDModel {
     static var entity: String = "Types"
 }
-extension PetType: Migration {}
+extension PetType: Migration {
+    
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
+            builder.unique(on: \.name)
+        }
+    }
+}
 extension PetType: Content {}
 extension PetType: Parameter {}
 

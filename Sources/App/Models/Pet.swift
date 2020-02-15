@@ -20,6 +20,9 @@ final class Pet: Codable {
     }
 }
 
+extension Pet: Content {}
+extension Pet: Parameter {}
+
 extension Pet: PostgreSQLModel {
     static var entity: String = "Pets"
 }
@@ -35,8 +38,6 @@ extension Pet: Migration {
     }
 }
 
-extension Pet: Content {}
-extension Pet: Parameter {}
 extension Pet {
     var user: Parent<Pet, User> {
         return parent(\.userID)
@@ -45,4 +46,9 @@ extension Pet {
     var typeOf: Parent<Pet, PetType> {
         return parent(\.typeID)
     }
+    
+    var categories: Siblings<Pet, PetThread, PetThreadPivot> {
+      return siblings()
+    }
 }
+

@@ -21,6 +21,13 @@ final class PetThreadType: Codable {
 extension PetThreadType: PostgreSQLUUIDModel {
     static var entity: String = "ThreadTypes"
 }
-extension PetThreadType: Migration {}
+extension PetThreadType: Migration {
+    static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
+            builder.unique(on: \.name)
+        }
+    }
+}
 extension PetThreadType: Content {}
 extension PetThreadType: Parameter {}

@@ -8,6 +8,7 @@
 import Foundation
 import Vapor
 import Fluent
+import Crypto
 
 struct UserController: RouteCollection {
     func boot(router: Router) throws {
@@ -15,17 +16,35 @@ struct UserController: RouteCollection {
         usersRoute.post(User.self, use: createHandler)
         usersRoute.get(use: getAllHandler)
         usersRoute.get(User.parameter, use: getHandler)
+        usersRoute.get(User.parameter, "pets", use: getPetsHandler)
+        
+        let basicAuthMiddleware = User.basicAuthMiddleware(using: BCryptDigest())
+          let basicAuthGroup = usersRoute.grouped(basicAuthMiddleware)
+          basicAuthGroup.post("login", use: loginHandler)
     }
     
-    func createHandler(_ req: Request, user: User) throws -> Future<User> {
-        return user.save(on: req)
+    func createHandler(_ req: Request, user: User) throws -> Future<User.Public> {
+        user.password = try BCrypt.hash(user.password)
+        return user.save(on: req).convertToPublic()
     }
     
-    func getAllHandler(_ req: Request) throws -> Future<[User]> {
-        return User.query(on: req).all()
+    func getAllHandler(_ req: Request) throws -> Future<[User.Public]> {
+        return User.query(on: req).decode(data: User.Public.self).all()
     }
     
-    func getHandler(_ req: Request) throws -> Future<User> {
-        return try req.parameters.next(User.self)
+    func getHandler(_ req: Request) throws -> Future<User.Public> {
+        return try req.parameters.next(User.self).convertToPublic()
+    }
+    
+    func getPetsHandler(_ req: Request) throws -> Future<[Pet]> {
+      return try req.parameters.next(User.self).flatMap(to: [Pet].self) { user in
+        try user.pets.query(on: req).all()
+      }
+    }
+
+    func loginHandler(_ req: Request) throws -> Future<Token> {
+      let user = try req.requireAuthenticated(User.self)
+      let token = try Token.generate(for: user)
+      return token.save(on: req)
     }
 }

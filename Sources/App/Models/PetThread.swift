@@ -33,7 +33,6 @@ final class PetThread: Codable {
         self.executionInSeconds = executeIn
         self.typeID = type
     }
-    
 }
 
 extension PetThread: PostgreSQLModel {
@@ -43,10 +42,10 @@ extension PetThread: Migration {
     
     static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
          return Database.create(self, on: connection) { builder in
-             try addProperties(to: builder)
-             builder.reference(from: \.userID, to: \User.id)
-             builder.reference(from: \.typeID, to: \PetThreadType.id)
-             builder.reference(from: \.petID, to: \Pet.id)
+            try addProperties(to: builder)
+            builder.reference(from: \.userID, to: \User.id)
+            builder.reference(from: \.typeID, to: \PetThreadType.id)
+            builder.reference(from: \.petID, to: \Pet.id)
          }
      }
 }
