@@ -36,6 +36,10 @@ extension Pet: Migration {
             builder.reference(from: \.typeID, to: \PetType.id)
         }
     }
+    
+    static func revert(on connection: PostgreSQLConnection) -> Future<Void> {
+        return .done(on: connection)
+    }
 }
 
 extension Pet {

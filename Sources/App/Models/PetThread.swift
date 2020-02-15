@@ -22,8 +22,9 @@ final class PetThread: Codable {
     var dateCreated: Date?
     var isActive: Bool?
     var executionInSeconds: Int?
+    var imageURL: String?
     
-    init(name: String, threadDescription: String, userID: UUID, petID: Int, dateCreated: Date, isActive: Bool, executeIn: Int, type: PetThreadType.ID) {
+    init(name: String, threadDescription: String, userID: UUID, petID: Int, dateCreated: Date, isActive: Bool, executeIn: Int, type: PetThreadType.ID, imageURL: String) {
         self.threadName = name
         self.threadDescription = threadDescription
         self.userID = userID
@@ -32,6 +33,7 @@ final class PetThread: Codable {
         self.isActive = isActive
         self.executionInSeconds = executeIn
         self.typeID = type
+        self.imageURL = imageURL
     }
 }
 
@@ -53,6 +55,10 @@ extension PetThread: Migration {
             builder.reference(from: \.petID, to: \Pet.id)
          }
      }
+    
+    static func revert(on connection: PostgreSQLConnection) -> Future<Void> {
+        return .done(on: connection)
+    }
 }
 
 extension PetThread {

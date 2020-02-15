@@ -74,6 +74,10 @@ extension User: Migration {
             builder.unique(on: \.username)
         }
     }
+    
+    static func revert(on connection: PostgreSQLConnection) -> Future<Void> {
+        return .done(on: connection)
+    }
 }
 
 extension User: BasicAuthenticatable {
