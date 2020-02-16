@@ -32,7 +32,7 @@ struct PetThreadController: RouteCollection {
         return Pet.query(on: req).group(.and) {
             $0.filter(\.userID == userID).filter(\.id == petID)
         }.all().flatMap(to: PetThread.self) { pets in
-            if pets.count > 0 {
+            if !pets.isEmpty {
                  return thread.save(on: req)
             } else {
                 throw Abort(.badRequest)
@@ -44,9 +44,19 @@ struct PetThreadController: RouteCollection {
         return try flatMap(to: PetThread.self, req.parameters.next(PetThread.self), req.content.decode(PetThread.self), { (thread, updateThread) in
             thread.configure(with: updateThread)
             let user = try req.requireAuthenticated(User.self)
-            thread.userID = try user.requireID()
+            let userID = try user.requireID()
+            let petID = thread.petID
+            thread.userID = userID
             
-            return thread.save(on: req)
+            return Pet.query(on: req).group(.and) {
+                $0.filter(\.userID == userID).filter(\.id == petID)
+            }.all().flatMap(to: PetThread.self) { pets in
+                if !pets.isEmpty {
+                     return thread.save(on: req)
+                } else {
+                    throw Abort(.badRequest)
+                }
+            }
         })
     }
     
