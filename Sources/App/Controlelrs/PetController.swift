@@ -23,13 +23,7 @@ struct PetController: RouteCollection {
         tokenAuthGroup.delete(Pet.parameter, use: deleteHandler)
         tokenAuthGroup.post(Pet.parameter, "threads", PetThread.parameter, use: addThreadHandler)
         tokenAuthGroup.delete(Pet.parameter, "threads", PetThread.parameter, use: removeThreadHandler)
-        
         tokenAuthGroup.get(use: getAllHandler)
-//        tokenAuthGroup.get(Pet.parameter, use: getHandler)
-        //        tokenAuthGroup.get("search", use: searchHandler)
-        //        tokenAuthGroup.get("first", use: getFirstHandler)
-        //        tokenAuthGroup.get("sorted", use: sortedHandler)
-        //        tokenAuthGroup.get(Pet.parameter, "user", use: getUserHandler)
         tokenAuthGroup.get(Pet.parameter, "threads", use: getThreadsHandler)
     }
     
@@ -46,15 +40,6 @@ struct PetController: RouteCollection {
         pet.userID = try user.requireID()
         return pet.save(on: req)
     }
-    
-//    func getHandler(_ req: Request) throws -> Future<Pet> {
-//        let isAccepted = try _isAccetable(on: req, for: "userID")
-//        if isAccepted {
-//            return try req.parameters.next(Pet.self)
-//        } else {
-//            throw Abort(.badRequest)
-//        }
-//    }
     
     func updateHandler(_ req: Request) throws -> Future<Pet> {
         return try flatMap(to: Pet.self, req.parameters.next(Pet.self), req.content.decode(PetCreateData.self), { (pet, updatePet) in

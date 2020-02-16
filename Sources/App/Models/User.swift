@@ -88,3 +88,5 @@ extension User: BasicAuthenticatable {
 extension User: TokenAuthenticatable {
     typealias TokenType = Token
 }
+
+extension User: SessionAuthenticatable {}

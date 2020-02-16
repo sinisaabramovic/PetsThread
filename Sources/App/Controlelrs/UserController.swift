@@ -16,6 +16,7 @@ struct UserController: RouteCollection {
         //        usersRoute.get(use: getAllHandler)
         //        usersRoute.get(User.parameter, use: getHandler)
         usersRoute.post(User.self, use: createHandler)
+        usersRoute.post("logout", use: logoutHandler)
         
         let basicAuthMiddleware = User.basicAuthMiddleware(using: BCryptDigest())
         let basicAuthGroup = usersRoute.grouped(basicAuthMiddleware)
@@ -24,7 +25,7 @@ struct UserController: RouteCollection {
         let tokenAuthMiddleware = User.tokenAuthMiddleware()
         let guardAuthMiddleware = User.guardAuthMiddleware()
         let tokenAuthGroup = usersRoute.grouped(tokenAuthMiddleware, guardAuthMiddleware)
-        tokenAuthGroup.get(User.parameter, "pets", use: getPetsHandler)
+        tokenAuthGroup.get(User.parameter, "pets", use: getPetsHandler)        
     }
     
     func createHandler(_ req: Request, user: User) throws -> Future<User.Public> {
@@ -47,6 +48,7 @@ struct UserController: RouteCollection {
     }
     
     func loginHandler(_ req: Request) throws -> Future<Token> {
+        try req.unauthenticateSession(User.self)
         let user = try req.requireAuthenticated(User.self)
         
         let futureTokenExist = try Token.query(on: req).filter(\.userID == user.requireID()).first()
@@ -56,5 +58,10 @@ struct UserController: RouteCollection {
             tokenExists?.token = token.token
             return tokenExists?.update(on: req) ?? token.save(on: req)
         })
+    }
+    
+    func logoutHandler(_ req: Request) throws -> Future<HTTPStatus> {
+        try req.unauthenticateSession(User.self)
+        throw Abort(.ok)
     }
 }
