@@ -19,6 +19,7 @@ struct PetThreadController: RouteCollection {
         let tokenAuthGroup = threadsRoute.grouped(tokenAuthMiddleware, guardAuthMiddleware)
         tokenAuthGroup.post(PetThread.self, use: createHandler)
         tokenAuthGroup.get(use: getAllHandler)
+        tokenAuthGroup.put(PetThread.parameter, use: updateHandler)
         //        tokenAuthGroup.get(use: getHandler)
         tokenAuthGroup.get(PetThread.parameter, "pets", use: getPetsHandler)
     }
@@ -83,10 +84,10 @@ struct PetThreadController: RouteCollection {
     //
     func getPetsHandler(_ req: Request) throws -> Future<[Pet]> {
         return try req.parameters.next(PetThread.self).flatMap(to: [Pet].self) { thread in
-            try thread.pets.query(on: req).group(.or) { or in
+            try thread.pets.query(on: req).group(.and) { and in
                 let user = try req.requireAuthenticated(User.self)
                 let userID = try user.requireID()
-                or.filter(\.userID == userID)
+                and.filter(\.userID == userID)
             }.sort(\.id, .ascending).all()
         }
     }

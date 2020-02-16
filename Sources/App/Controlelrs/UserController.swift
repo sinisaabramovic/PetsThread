@@ -13,8 +13,8 @@ import Crypto
 struct UserController: RouteCollection {
     func boot(router: Router) throws {
         let usersRoute = router.grouped("api", "users")
-//        usersRoute.get(use: getAllHandler)
-//        usersRoute.get(User.parameter, use: getHandler)        
+        //        usersRoute.get(use: getAllHandler)
+        //        usersRoute.get(User.parameter, use: getHandler)
         usersRoute.post(User.self, use: createHandler)
         
         let basicAuthMiddleware = User.basicAuthMiddleware(using: BCryptDigest())
@@ -41,14 +41,20 @@ struct UserController: RouteCollection {
     }
     
     func getPetsHandler(_ req: Request) throws -> Future<[Pet]> {
-      return try req.parameters.next(User.self).flatMap(to: [Pet].self) { user in
-        try user.pet.query(on: req).all()
-      }
+        return try req.parameters.next(User.self).flatMap(to: [Pet].self) { user in
+            try user.pet.query(on: req).all()
+        }
     }
-
+    
     func loginHandler(_ req: Request) throws -> Future<Token> {
-      let user = try req.requireAuthenticated(User.self)
-      let token = try Token.generate(for: user)
-      return token.save(on: req)
+        let user = try req.requireAuthenticated(User.self)
+        
+        let futureTokenExist = try Token.query(on: req).filter(\.userID == user.requireID()).first()
+        
+        return futureTokenExist.flatMap({ (tokenExists) -> EventLoopFuture<Token> in
+            let token = try Token.generate(for: user)
+            tokenExists?.token = token.token
+            return tokenExists?.update(on: req) ?? token.save(on: req)
+        })
     }
 }
