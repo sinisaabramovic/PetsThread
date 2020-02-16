@@ -80,17 +80,14 @@ struct PetController: RouteCollection {
     }
     
     func searchHandler(_ req: Request) throws -> Future<[Pet]> {
-        let isAccepted = try _isAccetable(on: req, for: "userID")
-        if isAccepted {
-            guard let search = req.query[String.self, at: "name"] else {
-                throw Abort(.badRequest)
-            }
-            return Pet.query(on: req).group(.or) { or in
-                or.filter(\.name == search)
-            }.all()
-        } else {
+        guard let search = req.query[String.self, at: "name"] else {
             throw Abort(.badRequest)
         }
+        let user = try req.requireAuthenticated(User.self)
+        let userID = try user.requireID()
+        return Pet.query(on: req).group(.or) { or in
+            or.filter(\.name == search).filter(\.userID == userID)
+        }.all()
     }
     
     func getFirstHandler(_ req: Request) throws -> Future<Pet> {
@@ -126,20 +123,20 @@ struct PetController: RouteCollection {
     func addThreadHandler(_ req: Request) throws -> Future<HTTPStatus> {
         return try flatMap(to: HTTPStatus.self, req.parameters.next(Pet.self),
                            req.parameters.next(PetThread.self)) { pet, thread in
-                            return pet.categories.attach(thread, on: req).transform(to: .created)
+                            return pet.threads.attach(thread, on: req).transform(to: .created)
         }
     }
     
     func getThreadsHandler(_ req: Request) throws -> Future<[PetThread]> {
         return try req.parameters.next(Pet.self).flatMap(to: [PetThread].self) { pet in
-            try pet.categories.query(on: req).all()
+            try pet.threads.query(on: req).all()
         }
     }
     
     func removeThreadHandler(_ req: Request) throws -> Future<HTTPStatus> {
         return try flatMap(to: HTTPStatus.self, req.parameters.next(Pet.self),
                            req.parameters.next(PetThread.self)) { pet, thread in
-                            return pet.categories.detach(thread, on: req).transform(to: .noContent)
+                            return pet.threads.detach(thread, on: req).transform(to: .noContent)
         }
     }
 }

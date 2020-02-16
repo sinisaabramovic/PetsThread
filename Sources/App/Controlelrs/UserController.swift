@@ -42,7 +42,7 @@ struct UserController: RouteCollection {
     
     func getPetsHandler(_ req: Request) throws -> Future<[Pet]> {
       return try req.parameters.next(User.self).flatMap(to: [Pet].self) { user in
-        try user.pets.query(on: req).all()
+        try user.pet.query(on: req).all()
       }
     }
 

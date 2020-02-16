@@ -44,7 +44,7 @@ extension User: Content {}
 
 extension User {
     
-    var pets: Children<User, Pet> {
+    var pet: Children<User, Pet> {
         return children(\.userID)
     }
     

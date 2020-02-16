@@ -25,8 +25,19 @@ struct PetThreadController: RouteCollection {
     
     func createHandler(_ req: Request, thread: PetThread) throws -> Future<PetThread> {
         let user = try req.requireAuthenticated(User.self)
-        thread.userID = try user.requireID()
-        return thread.save(on: req)
+        let userID = try user.requireID()
+        let petID = thread.petID
+        thread.userID = userID
+        // taj pet mora pripadati tom korinsiku!!!!
+        return Pet.query(on: req).group(.and) {
+            $0.filter(\.userID == userID).filter(\.id == petID)
+        }.all().flatMap(to: PetThread.self) { pets in
+            if pets.count > 0 {
+                 return thread.save(on: req)
+            } else {
+                throw Abort(.badRequest)
+            }
+        }
     }
     
     func updateHandler(_ req: Request) throws -> Future<PetThread> {

@@ -51,7 +51,7 @@ extension Pet {
         return parent(\.typeID)
     }
     
-    var categories: Siblings<Pet, PetThread, PetThreadPivot> {
+    var threads: Siblings<Pet, PetThread, PetThreadPivot> {
       return siblings()
     }
     
